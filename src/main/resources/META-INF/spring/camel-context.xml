@@ -1,17 +1,20 @@
 <beans xmlns="http://www.springframework.org/schema/beans"
        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xmlns:camel="http://camel.apache.org/schema/spring"
+       xmlns:cxf="http://camel.apache.org/schema/cxf"
        xsi:schemaLocation="
-         http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd
-         http://camel.apache.org/schema/spring http://camel.apache.org/schema/spring/camel-spring.xsd">
+          http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd
+          http://camel.apache.org/schema/spring http://camel.apache.org/schema/spring/camel-spring.xsd
+          http://camel.apache.org/schema/cxf http://camel.apache.org/schema/cxf/camel-cxf.xsd">
 
-    <sslContextParameters id="sslContextParameters" xmlns="http://camel.apache.org/schema/spring">
+    <camel:sslContextParameters id="sslContextParameters" xmlns="http://camel.apache.org/schema/spring">
         <keyManagers keyPassword="redhat">
             <keyStore type="JKS" resource="${location.keystore}keystore.jks" password="redhat"/>
         </keyManagers>
         <trustManagers>
             <keyStore type="JKS" resource="${location.truststore}keystore.jks" password="redhat"/>
         </trustManagers>
-    </sslContextParameters>
+    </camel:sslContextParameters>
 
     <bean id="jmsConnectionFactory" class="org.apache.activemq.ActiveMQSslConnectionFactory">
         <property name="brokerURL" value="ssl://localhost:61617"/>
@@ -30,10 +33,18 @@
         <property name="configuration" ref="jmsConfig"/>
     </bean>
 
-    <camelContext id="camel" xmlns="http://camel.apache.org/schema/spring">
+    <camel:camelContext id="camel" xmlns="http://camel.apache.org/schema/spring">
         <routeBuilder ref="routeBuilder"/>
-    </camelContext>
+    </camel:camelContext>
 
     <bean id="routeBuilder" class="cz.cvut.iss.sysint.OrderProcessRoute"/>
+
+    <cxf:cxfEndpoint id="orderEndpoint"
+                     address="http://localhost:8333/services/OrderService"
+                     serviceClass="cz.cvut.iss.sysint.OrderService"/>
+
+    <bean id="jetty" class="org.apache.camel.component.jetty8.JettyHttpComponent8">
+        <property name="sslContextParameters" ref="sslContextParameters"/>
+    </bean>
 
 </beans>

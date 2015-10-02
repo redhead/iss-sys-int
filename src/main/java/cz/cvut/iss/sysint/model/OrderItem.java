@@ -1,21 +1,9 @@
 package cz.cvut.iss.sysint.model;
 
-import org.apache.camel.dataformat.bindy.annotation.CsvRecord;
-import org.apache.camel.dataformat.bindy.annotation.DataField;
-
-// TASK-3
-// Mark the class as csv record, use ';' as separator and crlf set to 'UNIX'
-@CsvRecord(separator = ";", crlf = "UNIX")
 public class OrderItem {
 
-    // TASK-3
-    // Mark this attribute as CSV field, do not forget to set correct position (pos)
-    @DataField(pos = 1)
-    private long articleId;
+    private String item;
 
-    // TASK-3
-    // Mark this attribute as CSV field, do not forget to set correct position (pos)
-    @DataField(pos = 2)
     private int count;
 
     private double unitPrice;
@@ -23,18 +11,18 @@ public class OrderItem {
     public OrderItem() {
     }
 
-    public OrderItem(long articleId, int count, double unitPrice) {
-        this.articleId = articleId;
+    public OrderItem(String item, int count, double unitPrice) {
+        this.item = item;
         this.count = count;
         this.unitPrice = unitPrice;
     }
 
-    public long getArticleId() {
-        return articleId;
+    public String getArticleId() {
+        return item;
     }
 
-    public void setArticleId(long articleId) {
-        this.articleId = articleId;
+    public void setArticleId(String item) {
+        this.item = item;
     }
 
     public int getCount() {
