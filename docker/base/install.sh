@@ -17,16 +17,16 @@ set -e
 cd /opt/jboss
 
 # Download and extract the distro
-curl -O ${FUSE_DISTRO_URL}
-jar -xvf ${FUSE_ARTIFACT_ID}-${FUSE_VERSION}.zip
-rm ${FUSE_ARTIFACT_ID}-${FUSE_VERSION}.zip
+# curl -O ${FUSE_DISTRO_URL}
+jar -xvf jboss-fuse.zip
+rm jboss-fuse.zip
 mv jboss-fuse-${FUSE_VERSION} jboss-fuse
 chmod a+x jboss-fuse/bin/*
-rm jboss-fuse/bin/*.bat jboss-fuse/bin/start jboss-fuse/bin/stop jboss-fuse/bin/status jboss-fuse/bin/patch
+rm jboss-fuse/bin/start jboss-fuse/bin/stop jboss-fuse/bin/status jboss-fuse/bin/patch
 
 # Lets remove some bits of the distro which just add extra weight in a docker image.
-rm -rf jboss-fuse/extras
-rm -rf jboss-fuse/quickstarts
+# rm -rf jboss-fuse/extras
+# rm -rf jboss-fuse/quickstarts
 
 #
 # Let the karaf container name/id come from setting the FUSE_KARAF_NAME && FUSE_RUNTIME_ID env vars
@@ -48,7 +48,7 @@ export KARAF_OPTS="-Dkaraf.name=${FUSE_KARAF_NAME} -Druntime.id=${FUSE_RUNTIME_I
 #
 # Move the bundle cache and tmp directories outside of the data dir so it's not persisted between container runs
 #
-mv jboss-fuse/data/tmp jboss-fuse/tmp
+# mv jboss-fuse/data/tmp jboss-fuse/tmp
 echo '
 org.osgi.framework.storage=${karaf.base}/tmp/cache
 '>> jboss-fuse/etc/config.properties

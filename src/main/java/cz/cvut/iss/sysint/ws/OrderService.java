@@ -1,4 +1,4 @@
-package cz.cvut.iss.sysint;
+package cz.cvut.iss.sysint.ws;
 
 import cz.cvut.iss.sysint.model.Order;
 

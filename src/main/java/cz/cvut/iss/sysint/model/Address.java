@@ -76,6 +76,32 @@ public class Address {
     }
 
     @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (!(o instanceof Address)) return false;
+
+        Address address = (Address) o;
+
+        if (!city.equals(address.city)) return false;
+        if (!firstName.equals(address.firstName)) return false;
+        if (!lastName.equals(address.lastName)) return false;
+        if (!street.equals(address.street)) return false;
+        if (!zipCode.equals(address.zipCode)) return false;
+
+        return true;
+    }
+
+    @Override
+    public int hashCode() {
+        int result = firstName.hashCode();
+        result = 31 * result + lastName.hashCode();
+        result = 31 * result + street.hashCode();
+        result = 31 * result + city.hashCode();
+        result = 31 * result + zipCode.hashCode();
+        return result;
+    }
+
+    @Override
     public String toString() {
         return "Address [firstName=" + firstName + ", lastName=" + lastName
             + ", street=" + street + ", city=" + city + ", zipCode=" + zipCode + "]";

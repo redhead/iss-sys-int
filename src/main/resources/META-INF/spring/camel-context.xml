@@ -7,6 +7,10 @@
           http://camel.apache.org/schema/spring http://camel.apache.org/schema/spring/camel-spring.xsd
           http://camel.apache.org/schema/cxf http://camel.apache.org/schema/cxf/camel-cxf.xsd">
 
+    <bean id="bridgePropertyPlaceholder" class="org.apache.camel.spring.spi.BridgePropertyPlaceholderConfigurer">
+        <property name="location" value="classpath:application.properties"/>
+    </bean>
+
     <camel:sslContextParameters id="sslContextParameters" xmlns="http://camel.apache.org/schema/spring">
         <keyManagers keyPassword="redhat">
             <keyStore type="JKS" resource="${location.keystore}keystore.jks" password="redhat"/>
@@ -15,6 +19,18 @@
             <keyStore type="JKS" resource="${location.truststore}keystore.jks" password="redhat"/>
         </trustManagers>
     </camel:sslContextParameters>
+
+    <camel:sslContextParameters id="remoteSystemsSslContextParameters" xmlns="http://camel.apache.org/schema/spring">
+        <keyManagers keyPassword="redhat">
+            <keyStore type="JKS" resource="${location.keystore}redhat-keystore.jks" password="redhat"/>
+        </keyManagers>
+        <trustManagers>
+            <keyStore type="JKS" resource="${location.truststore}redhat-keystore.jks" password="redhat"/>
+        </trustManagers>
+    </camel:sslContextParameters>
+
+    <bean id="allowAllHostnameVerifier" class="org.apache.http.conn.ssl.AllowAllHostnameVerifier" />
+
 
     <bean id="jmsConnectionFactory" class="org.apache.activemq.ActiveMQSslConnectionFactory">
         <property name="brokerURL" value="ssl://localhost:61617"/>
@@ -33,18 +49,46 @@
         <property name="configuration" ref="jmsConfig"/>
     </bean>
 
-    <camel:camelContext id="camel" xmlns="http://camel.apache.org/schema/spring">
+    <camelContext id="camel" xmlns="http://camel.apache.org/schema/spring" trace="true">
+        <propertyPlaceholder id="properties" location="classpath:application.properties" />
+
         <routeBuilder ref="routeBuilder"/>
-    </camel:camelContext>
+
+        <endpoint id="supplierAHttp" uri="http4:${supplier.a.url}">
+            <property key="authMethod" value="Basic" />
+            <property key="authenticationPreemptive" value="true" />
+            <property key="authUsername" value="webuser" />
+            <property key="authPassword" value="JBoss.123" />
+            <property key="sslContextParameters" value="#remoteSystemsSslContextParameters" />
+            <property key="x509HostnameVerifier" value="allowAllHostnameVerifier" />
+        </endpoint>
+
+        <endpoint id="supplierBHttp" uri="http4:${supplier.b.url}">
+            <property key="sslContextParameters" value="#remoteSystemsSslContextParameters" />
+            <property key="x509HostnameVerifier" value="allowAllHostnameVerifier" />
+        </endpoint>
+
+        <endpoint id="accountingHttp" uri="http4:${accounting.url}">
+            <property key="sslContextParameters" value="#remoteSystemsSslContextParameters" />
+            <property key="x509HostnameVerifier" value="allowAllHostnameVerifier" />
+        </endpoint>
+    </camelContext>
 
     <bean id="routeBuilder" class="cz.cvut.iss.sysint.OrderProcessRoute"/>
 
     <cxf:cxfEndpoint id="orderEndpoint"
                      address="http://localhost:8333/services/OrderService"
-                     serviceClass="cz.cvut.iss.sysint.OrderService"/>
+                     serviceClass="cz.cvut.iss.sysint.ws.OrderService"/>
 
     <bean id="jetty" class="org.apache.camel.component.jetty8.JettyHttpComponent8">
         <property name="sslContextParameters" ref="sslContextParameters"/>
+    </bean>
+
+    <bean id="dataSource" class="org.apache.commons.dbcp.BasicDataSource" destroy-method="close">
+        <property name="driverClassName" value="org.h2.Driver"/>
+        <property name="url" value="jdbc:h2:tcp://${db.connection.hostAndPort}/~/exam"/>
+        <property name="username" value="sa"/>
+        <property name="password" value="sa"/>
     </bean>
 
 </beans>

@@ -1,12 +1,23 @@
 package cz.cvut.iss.sysint.model;
 
+import com.fasterxml.jackson.annotation.JsonGetter;
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonProperty;
+
+import javax.xml.bind.annotation.XmlTransient;
+
 public class OrderItem {
 
+    @JsonIgnore
     private String item;
 
     private int count;
 
     private double unitPrice;
+
+    @XmlTransient
+    @JsonIgnore
+    private boolean fromSupplier;
 
     public OrderItem() {
     }
@@ -17,11 +28,13 @@ public class OrderItem {
         this.unitPrice = unitPrice;
     }
 
-    public String getArticleId() {
+    @JsonIgnore
+    public String getItem() {
         return item;
     }
 
-    public void setArticleId(String item) {
+    @JsonIgnore
+    public void setItem(String item) {
         this.item = item;
     }
 
@@ -33,20 +46,39 @@ public class OrderItem {
         this.count = count;
     }
 
+    @JsonIgnore
     public double getUnitPrice() {
         return unitPrice;
     }
 
+    @JsonIgnore
     public void setUnitPrice(double unitPrice) {
         this.unitPrice = unitPrice;
     }
 
+    @JsonIgnore
+    @XmlTransient
     public double getPrice() {
         return count * getUnitPrice();
     }
 
+    @JsonIgnore
+    public boolean isFromSupplier() {
+        return fromSupplier;
+    }
+
+    @JsonIgnore
+    public void setFromSupplier(boolean fromSupplier) {
+        this.fromSupplier = fromSupplier;
+    }
+
+    @XmlTransient
+    public int getArticleId() {
+        return 1;
+    }
+
     @Override
     public String toString() {
-        return "OrderItem [articleId=" + articleId + ", count=" + count + ", unitPrice=" + unitPrice + "]";
+        return "OrderItem [articleId=" + item + ", count=" + count + ", unitPrice=" + unitPrice + ", fromSupplier=" + fromSupplier + "]";
     }
 }

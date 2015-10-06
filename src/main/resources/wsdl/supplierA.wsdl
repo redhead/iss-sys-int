@@ -1,0 +1,83 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<wsdl:definitions xmlns:wsdl="http://schemas.xmlsoap.org/wsdl/" xmlns:tns="urn:com.redhat.sysint.exam:supplier-a"
+                  xmlns:soap="http://schemas.xmlsoap.org/wsdl/soap/"
+                  name="SupplierAService" targetNamespace="urn:com.redhat.sysint.exam:supplier-a">
+    <wsdl:types>
+        <xs:schema xmlns:xs="http://www.w3.org/2001/XMLSchema" xmlns:tns="urn:com.redhat.sysint.exam:supplier-a"
+                   attributeFormDefault="unqualified" elementFormDefault="unqualified"
+                   targetNamespace="urn:com.redhat.sysint.exam:supplier-a">
+            <xs:element name="available" type="tns:available"/>
+            <xs:element name="availableResponse" type="tns:availableResponse"/>
+            <xs:complexType name="available">
+                <xs:sequence>
+                    <xs:element minOccurs="0" name="ItemRequest" type="tns:itemRequest"/>
+                </xs:sequence>
+            </xs:complexType>
+            <xs:complexType name="itemRequest">
+                <xs:sequence>
+                    <xs:element name="amount" type="xs:int"/>
+                    <xs:element minOccurs="0" name="sku" type="xs:string"/>
+                </xs:sequence>
+            </xs:complexType>
+            <xs:complexType name="availableResponse">
+                <xs:sequence>
+                    <xs:element minOccurs="0" name="ItemReply" type="tns:itemReply"/>
+                </xs:sequence>
+            </xs:complexType>
+            <xs:complexType name="itemReply">
+                <xs:sequence>
+                    <xs:element name="available" type="xs:boolean"/>
+                    <xs:element minOccurs="0" name="price" type="xs:decimal"/>
+                </xs:sequence>
+            </xs:complexType>
+            <xs:element name="UnkownItemException" type="tns:UnkownItemException"/>
+            <xs:complexType name="UnkownItemException">
+                <xs:sequence>
+                    <xs:element minOccurs="0" name="message" type="xs:string"/>
+                </xs:sequence>
+            </xs:complexType>
+        </xs:schema>
+    </wsdl:types>
+    <wsdl:message name="UnkownItemException">
+        <wsdl:part element="tns:UnkownItemException" name="UnkownItemException">
+        </wsdl:part>
+    </wsdl:message>
+    <wsdl:message name="available">
+        <wsdl:part element="tns:available" name="parameters">
+        </wsdl:part>
+    </wsdl:message>
+    <wsdl:message name="availableResponse">
+        <wsdl:part element="tns:availableResponse" name="parameters">
+        </wsdl:part>
+    </wsdl:message>
+    <wsdl:portType name="SupplierA">
+        <wsdl:operation name="available">
+            <wsdl:input message="tns:available" name="available">
+            </wsdl:input>
+            <wsdl:output message="tns:availableResponse" name="availableResponse">
+            </wsdl:output>
+            <wsdl:fault message="tns:UnkownItemException" name="UnkownItemException">
+            </wsdl:fault>
+        </wsdl:operation>
+    </wsdl:portType>
+    <wsdl:binding name="SupplierAServiceSoapBinding" type="tns:SupplierA">
+        <soap:binding style="document" transport="http://schemas.xmlsoap.org/soap/http"/>
+        <wsdl:operation name="available">
+            <soap:operation soapAction="" style="document"/>
+            <wsdl:input name="available">
+                <soap:body use="literal"/>
+            </wsdl:input>
+            <wsdl:output name="availableResponse">
+                <soap:body use="literal"/>
+            </wsdl:output>
+            <wsdl:fault name="UnkownItemException">
+                <soap:fault name="UnkownItemException" use="literal"/>
+            </wsdl:fault>
+        </wsdl:operation>
+    </wsdl:binding>
+    <wsdl:service name="SupplierAService">
+        <wsdl:port binding="tns:SupplierAServiceSoapBinding" name="SupplierAPort">
+            <soap:address location="http://192.168.59.103:8080/supplier-a/SupplierAService"/>
+        </wsdl:port>
+    </wsdl:service>
+</wsdl:definitions>

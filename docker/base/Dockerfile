@@ -1,7 +1,7 @@
 FROM jboss/base-jdk:8
 
 # Set the FUSE_VERSION env variable
-ENV FUSE_VERSION 6.2.0.redhat-099
+ENV FUSE_VERSION 6.2.0.redhat-133
 
 # If the container is launched with re-mapped ports, these ENV vars should
 # be set to the remapped values.
@@ -16,7 +16,7 @@ ENV FUSE_PUBLIC_AMQP_SSL_PORT 5671
 
 # Install fuse in the image.
 COPY install.sh /opt/jboss/install.sh
-#COPY jboss-fuse.zip /opt/jboss/jboss-fuse.zip
+COPY jboss-fuse.zip /opt/jboss/jboss-fuse.zip
 RUN /opt/jboss/install.sh
 
 
@@ -68,18 +68,3 @@ RUN cd $JBOSS_HOME \
  && rm apiman-distro-wildfly8-$APIMAN_VERSION-overlay.zip
 
 
-########################
-#### CUSTOM SETTINGS ###
-########################
-
-RUN echo 'admin=admin,admin,manager,viewer,Monitor, Operator, Maintainer, Deployer, Auditor, Administrator, SuperUser' > /opt/jboss/jboss-fuse/etc/users.properties
-
-ADD activemq.xml /opt/jboss/jboss-fuse/etc/
-ADD keystore.jks /opt/jboss/jboss-fuse/bin/
-
-ADD run.sh /opt/run.sh
-CMD sh -c '/opt/run.sh';'bash'
-
-ADD feature.xml /opt/jboss/jboss-fuse/deploy/sys-int-feature.xml
-
-ADD sys-int.jar /opt/sys-int.jar

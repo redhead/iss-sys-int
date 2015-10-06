@@ -1,12 +1,24 @@
 package cz.cvut.iss.sysint.model;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
+
+import javax.xml.bind.annotation.XmlAccessType;
+import javax.xml.bind.annotation.XmlAccessorType;
+import javax.xml.bind.annotation.XmlElement;
 import java.util.List;
 
+@XmlAccessorType(XmlAccessType.FIELD)
 public class Order {
 
-    private long id;
-    private List<OrderItem> items;
+    @XmlElement(nillable = true)
+    private Long id;
+
     private Address address;
+
+    private List<OrderItem> items;
+
+    @JsonIgnore
+    @XmlElement(nillable = true)
     private OrderStatus status;
 
     public Order() {
@@ -19,11 +31,11 @@ public class Order {
         this.status = status;
     }
 
-    public long getId() {
+    public Long getId() {
         return id;
     }
 
-    public void setId(long id) {
+    public void setId(Long id) {
         this.id = id;
     }
 
@@ -53,6 +65,6 @@ public class Order {
 
     @Override
     public String toString() {
-        return "Order [id=" + id + ", items=" + items + ", address=" + address  + "]";
+        return "Order [id=" + id + ", items=" + items + ", address=" + address + "]";
     }
 }
