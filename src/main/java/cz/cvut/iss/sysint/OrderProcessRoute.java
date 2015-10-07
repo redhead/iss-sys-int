@@ -5,7 +5,6 @@ import cz.cvut.iss.sysint.converter.SupplierAResponseConverter;
 import cz.cvut.iss.sysint.converter.SupplierBRequestConverter;
 import cz.cvut.iss.sysint.converter.SupplierBResponseConverter;
 import cz.cvut.iss.sysint.exception.CancelOrderException;
-import cz.cvut.iss.sysint.exception.InvalidOrderException;
 import cz.cvut.iss.sysint.model.Address;
 import cz.cvut.iss.sysint.model.Order;
 import cz.cvut.iss.sysint.model.OrderItem;
@@ -20,7 +19,6 @@ import org.apache.camel.component.http4.HttpOperationFailedException;
 import org.apache.camel.component.jackson.JacksonDataFormat;
 import org.apache.camel.dataformat.soap.name.ServiceInterfaceStrategy;
 import org.apache.camel.model.RouteDefinition;
-import org.apache.camel.model.dataformat.JsonLibrary;
 import org.apache.camel.model.dataformat.SoapJaxbDataFormat;
 import org.apache.camel.model.rest.RestBindingMode;
 import org.apache.camel.model.rest.RestDefinition;
@@ -185,7 +183,7 @@ public class OrderProcessRoute extends RouteBuilder {
 
     private void soapEndpoint() {
         // jetty proxy for SSL
-        from("jetty:https://0.0.0.0:8443/services/OrderService?disableStreamCache=true&matchOnUriPrefix=true&sslContextParametersRef=#sslContextParameters&matchOnUriPrefix=true")
+        from("jetty:https://0.0.0.0:8444/services/OrderService?disableStreamCache=true&matchOnUriPrefix=true&sslContextParametersRef=#sslContextParameters&matchOnUriPrefix=true")
             .id("soapProxy")
             .removeHeaders("Camel*")
             .to("jetty:http://localhost:8333/services/OrderService?bridgeEndpoint=true&throwExceptionOnFailure=false");

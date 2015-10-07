@@ -39,7 +39,7 @@ Build the project main image (needed with every update in the project source to 
 
 Run the project's main image
 
-    docker run --name int -it --link sys -p 8181:8181 -p 8081:8080 -p 8444:8443 iss/int
+    docker run --name int -it --link sys -p 8181:8181 -p 8081:8080 -p 8444:8444 iss/int
     
 Now the containers (`sys` - theirs; and `int` - ours) are linked together. After the container boots up, the JBoss Fuse console should be ready to use. Also:
 
@@ -64,7 +64,7 @@ With every change in the project source reinstall, rebuild and deploy:
     
     docker stop int; docker rm int              (stop and remove the container if it was running)
     docker build -t iss/int docker/main
-    docker run --name int -it --link sys -p 8181:8181 -p 8081:8080 -p 8444:8443 iss/int
+    docker run --name int -it --link sys -p 8181:8181 -p 8081:8080 -p 8444:8444 iss/int
     
     # once Fuse console loaded
     features:addurl file:/opt/jboss/jboss-fuse/deploy/sys-int-feature.xml
