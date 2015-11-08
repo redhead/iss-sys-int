@@ -73,3 +73,16 @@ With every change in the project source reinstall, rebuild and deploy:
 If you change something in the image configuration only (`docker/main`), you don't have to run `maven clean install`.
 
 Or better run the project locally first before running it in docker.
+
+### AMQ on Fuse
+
+First create fabric root container with username/password admin/admin
+
+	fabric:create
+	
+Then create MQ containers.
+
+	mq-create --create-container iss-broker --replicas 2 --group masterslave ms-broker
+	
+This create two master slave containers which have ActiveMQ brookers. 
+	
