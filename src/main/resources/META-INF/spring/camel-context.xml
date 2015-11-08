@@ -11,25 +11,31 @@
         <property name="location" value="classpath:application.properties"/>
     </bean>
 
-    <camel:sslContextParameters id="sslContextParameters" xmlns="http://camel.apache.org/schema/spring">
+    <camel:sslContextParameters id="sslContextParameters"
+                                xmlns="http://camel.apache.org/schema/spring">
         <keyManagers keyPassword="redhat">
-            <keyStore type="JKS" resource="${location.keystore}keystore.jks" password="redhat"/>
+            <keyStore type="JKS" resource="${location.keystore}keystore.jks"
+                      password="redhat"/>
         </keyManagers>
         <trustManagers>
-            <keyStore type="JKS" resource="${location.truststore}keystore.jks" password="redhat"/>
+            <keyStore type="JKS" resource="${location.truststore}keystore.jks"
+                      password="redhat"/>
         </trustManagers>
     </camel:sslContextParameters>
 
-    <camel:sslContextParameters id="remoteSystemsSslContextParameters" xmlns="http://camel.apache.org/schema/spring">
+    <camel:sslContextParameters id="remoteSystemsSslContextParameters"
+                                xmlns="http://camel.apache.org/schema/spring">
         <keyManagers keyPassword="redhat">
-            <keyStore type="JKS" resource="${location.keystore}redhat-keystore.jks" password="redhat"/>
+            <keyStore type="JKS" resource="${location.keystore}redhat-keystore.jks"
+                      password="redhat"/>
         </keyManagers>
         <trustManagers>
-            <keyStore type="JKS" resource="${location.truststore}redhat-keystore.jks" password="redhat"/>
+            <keyStore type="JKS" resource="${location.truststore}redhat-keystore.jks"
+                      password="redhat"/>
         </trustManagers>
     </camel:sslContextParameters>
 
-    <bean id="allowAllHostnameVerifier" class="org.apache.http.conn.ssl.AllowAllHostnameVerifier" />
+    <bean id="allowAllHostnameVerifier" class="org.apache.http.conn.ssl.AllowAllHostnameVerifier"/>
 
 
     <bean id="jmsConnectionFactory" class="org.apache.activemq.ActiveMQSslConnectionFactory">
@@ -49,28 +55,30 @@
         <property name="configuration" ref="jmsConfig"/>
     </bean>
 
-    <camelContext id="camel" xmlns="http://camel.apache.org/schema/spring" trace="true">
-        <propertyPlaceholder id="properties" location="classpath:application.properties" />
+    <camelContext id="camel" xmlns="http://camel.apache.org/schema/spring"
+                  trace="true">
+        <propertyPlaceholder id="properties"
+                             location="classpath:application.properties"/>
 
         <routeBuilder ref="routeBuilder"/>
 
         <endpoint id="supplierAHttp" uri="http4:${supplier.a.url}">
-            <property key="authMethod" value="Basic" />
-            <property key="authenticationPreemptive" value="true" />
-            <property key="authUsername" value="webuser" />
-            <property key="authPassword" value="JBoss.123" />
-            <property key="sslContextParameters" value="#remoteSystemsSslContextParameters" />
-            <property key="x509HostnameVerifier" value="allowAllHostnameVerifier" />
+            <property key="authMethod" value="Basic"/>
+            <property key="authenticationPreemptive" value="true"/>
+            <property key="authUsername" value="webuser"/>
+            <property key="authPassword" value="JBoss.123"/>
+            <property key="sslContextParameters" value="#remoteSystemsSslContextParameters"/>
+            <property key="x509HostnameVerifier" value="allowAllHostnameVerifier"/>
         </endpoint>
 
         <endpoint id="supplierBHttp" uri="http4:${supplier.b.url}">
-            <property key="sslContextParameters" value="#remoteSystemsSslContextParameters" />
-            <property key="x509HostnameVerifier" value="allowAllHostnameVerifier" />
+            <property key="sslContextParameters" value="#remoteSystemsSslContextParameters"/>
+            <property key="x509HostnameVerifier" value="allowAllHostnameVerifier"/>
         </endpoint>
 
         <endpoint id="accountingHttp" uri="http4:${accounting.url}">
-            <property key="sslContextParameters" value="#remoteSystemsSslContextParameters" />
-            <property key="x509HostnameVerifier" value="allowAllHostnameVerifier" />
+            <property key="sslContextParameters" value="#remoteSystemsSslContextParameters"/>
+            <property key="x509HostnameVerifier" value="allowAllHostnameVerifier"/>
         </endpoint>
     </camelContext>
 
@@ -84,11 +92,64 @@
         <property name="sslContextParameters" ref="sslContextParameters"/>
     </bean>
 
-    <bean id="dataSource" class="org.apache.commons.dbcp.BasicDataSource" destroy-method="close">
+    <bean id="dataSource" class="org.apache.commons.dbcp.BasicDataSource"
+          destroy-method="close">
         <property name="driverClassName" value="org.h2.Driver"/>
-        <property name="url" value="jdbc:h2:tcp://${db.connection.hostAndPort}/~/exam"/>
+        <property name="url"
+                  value="jdbc:h2:tcp://${db.connection.hostAndPort}/~/exam"/>
         <property name="username" value="sa"/>
         <property name="password" value="sa"/>
+    </bean>
+
+
+    <bean id="jtaTxMgr"
+          class="org.springframework.transaction.jta.JtaTransactionManager">
+        <property name="transactionManager" ref="txMgr"/>
+        <property name="userTransaction" ref="userTransaction"/>
+    </bean>
+    <bean id="txMgr" class="com.atomikos.icatch.jta.UserTransactionManager"
+          init-method="init" destroy-method="close">
+        <property name="forceShutdown" value="false"/>
+    </bean>
+    <bean id="userTransaction" class="com.atomikos.icatch.jta.UserTransactionImp">
+        <property name="transactionTimeout" value="120"/>
+    </bean>
+    <bean id="REQUIRED" class="org.apache.camel.spring.spi.SpringTransactionPolicy">
+        <property name="transactionManager" ref="jtaTxMgr"/>
+        <property name="propagationBehaviorName" value="PROPAGATION_REQUIRED"/>
+    </bean>
+
+    <bean id="resourceManager" class="org.apache.activemq.pool.ActiveMQResourceManager"
+          init-method="recoverResource">
+        <property name="transactionManager" ref="txMgr"/>
+        <property name="connectionFactory" ref="connectionFactory"/>
+        <property name="resourceName" value="activemq.default"/>
+    </bean>
+    <bean id="connectionFactory" class="org.apache.activemq.pool.XaPooledConnectionFactory"
+          init-method="start" destroy-method="stop">
+        <property name="maxConnections" value="8"/>
+        <property name="connectionFactory" ref="xaConnectionFactory"/>
+        <property name="transactionManager" ref="txMgr"/>
+    </bean>
+    <bean id="xaConnectionFactory" class="org.apache.activemq.ActiveMQXAConnectionFactory">
+        <property name="brokerURL" value="${expedition.url}"/>
+        <property name="userName" value="admin"/>
+        <property name="password" value="admin"/>
+    </bean>
+    <bean id="activemqXa" class="org.apache.activemq.camel.component.ActiveMQComponent">
+        <property name="connectionFactory" ref="connectionFactory"/>
+        <property name="transacted" value="false"/>
+        <property name="transactionManager" ref="jtaTxMgr"/>
+    </bean>
+
+    <bean id="xaDataSource" class="org.apache.commons.dbcp.managed.BasicManagedDataSource">
+        <property name="transactionManager" ref="txMgr"/>
+        <property name="driverClassName" value="org.h2.Driver"/>
+        <property name="url"
+                  value="jdbc:h2:tcp://${db.connection.hostAndPort}/~/exam"/>
+        <property name="username" value="sa"/>
+        <property name="password" value="sa"/>
+        <property name="defaultAutoCommit" value="false"/>
     </bean>
 
 </beans>

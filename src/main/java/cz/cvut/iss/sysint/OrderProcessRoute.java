@@ -55,49 +55,62 @@ public class OrderProcessRoute extends RouteBuilder {
         from("direct:process-order")
             .id("orderProcess")
             .bean(OrderStatusProvider.class, "inProcess")
+            .bean(Debugger.class,"process")
             .setProperty("isVipCustomer", method(VipCustomerProvider.class, "isVip"))
             .split(simple("${body.items}"))
                 .to("direct:process-order-item")
             .end()
             .multicast()
                 .to("direct:accounting")
-                .to("activemq:shipping")
+                .to("activemqXa:shipping")
             .end();
 
         from("direct:process-order-item")
             .id("orderItemProcess")
             .setProperty("originalItem", body())
-            .process(new Processor() {
-                @Override
-                public void process(Exchange exchange) throws Exception {
-                    exchange.getIn().setHeader("fromSupplier", /*new Random().nextBoolean()*/true);
-                }
-            })
-            .choice()
-                .when(header("fromSupplier").isEqualTo(true))
-                    .multicast()
-                        .parallelProcessing()
-                        .aggregationStrategy(new ChooseBestSupplierAggregationStrategy())
-                        .to("direct:supplierA", "direct:supplierB")
-                    .end()
-                    .choice()
-                        .when(body().isNull())
-                            .log("Item not in inventory and no supplier has item available")
-                            .throwException(new CancelOrderException())
-                        .when(simple("${body.price} > ${exchangeProperty.originalItem.unitPrice} && ${exchangeProperty.isVipCustomer == false}"))
-                            .log("Price is greater, but customer is not VIP")
-                            .throwException(new CancelOrderException())
-                        .otherwise()
-                            .log("Marks the item as supplied from supplier")
-                            .process(new SupplierOrderItemProcessor())
-                    .end()
+           	.to("direct:check-available")
+           	.to("direct:best-choice")
             .end();
+            
+        
+        from("direct:check-available")
+        	.id("availabilityCheck")
+        	.to("sql:select count from item where id=:#${property.originalItem.item}?dataSource=xaDataSource")
+        	.process(new OrderItemFromSupplierProcessor())
+        	.end();
+        
+        from("direct:best-choice")
+        	.id("bestChoice")
+        	.log("best choice ${body}")
+        	.bean(Debugger.class, "process")
+        	.choice()
+            .when(header("fromSupplier").isEqualTo(true))
+                .multicast()
+                    .parallelProcessing()
+                    .aggregationStrategy(new ChooseBestSupplierAggregationStrategy())
+                    .to("direct:supplierA", "direct:supplierB")
+                .end()
+                .choice()
+                    .when(body().isNull())
+                        .log("Item not in inventory and no supplier has item available")
+                        .throwException(new CancelOrderException())
+                    .when(simple("${body.price} > ${exchangeProperty.originalItem.unitPrice} && ${exchangeProperty.isVipCustomer == false}"))
+                        .log("Price is greater, but customer is not VIP")
+                        .throwException(new CancelOrderException())
+                    .otherwise()
+                        .log("Marks the item as supplied from supplier")
+                        .process(new SupplierOrderItemProcessor())
+                .end()
+            .end();
+        	
 
         configureSupplierRoute(from("direct:supplierA"), "ref:supplierAHttp", SupplierA.class, new SupplierARequestConverter(), new SupplierAResponseConverter());
         configureSupplierRoute(from("direct:supplierB"), "ref:supplierBHttp", SupplierB.class, new SupplierBRequestConverter(), new SupplierBResponseConverter());
 
 //        from("timer://foo?fixedRate=true&period=5000")
-//            .to("sql:SELECT * FROM item?dataSource=dataSource")
+//        	.setProperty("articleId", constant("rhel"))
+//        	.setHeader("articleId", constant("rhel"))
+//            .to("sql:select count from item where id=':#${property.articleId}'?dataSource=xaDataSource")
 //            .log("${body}");
 
         JacksonDataFormat json = new JacksonDataFormat();
@@ -106,6 +119,7 @@ public class OrderProcessRoute extends RouteBuilder {
         from("direct:accounting")
             .id("accounting")
             .marshal(json)
+            .bean(Debugger.class,"process")
             .log("${body}")
             .removeHeaders("*")
             .setHeader(Exchange.CONTENT_TYPE, constant("application/json"))
@@ -119,7 +133,7 @@ public class OrderProcessRoute extends RouteBuilder {
             .end();
 
 
-        from("timer://foo?fixedRate=true&period=1&repeatCount=1")
+        from("timer://foo?fixedRate=true&period=10&repeatCount=1")
             .setBody(method(this, "createOrder"))
             .to("direct:new-order")
             .log("${body}");

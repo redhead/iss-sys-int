@@ -103,6 +103,42 @@
             <version>1.4</version>
         </dependency>
 
+        <!-- xa transaction -->
+        <dependency>
+            <groupId>com.atomikos</groupId>
+            <artifactId>transactions-jta</artifactId>
+            <version>3.9.3</version>
+        </dependency>
+
+        <!-- fabric -->
+
+        <dependency>
+            <groupId>io.fabric8.mq</groupId>
+            <artifactId>mq-fabric</artifactId>
+            <scope>runtime</scope>
+        </dependency>
+        <dependency>
+            <groupId>io.fabric8</groupId>
+            <artifactId>fabric-groups</artifactId>
+            <scope>runtime</scope>
+        </dependency>
+        <dependency>
+            <groupId>io.fabric8</groupId>
+            <artifactId>fabric-zookeeper</artifactId>
+            <scope>runtime</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.osgi</groupId>
+            <artifactId>org.osgi.core</artifactId>
+            <scope>runtime</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.osgi</groupId>
+            <artifactId>org.osgi.compendium</artifactId>
+            <scope>runtime</scope>
+        </dependency>
+
+
         <!-- testing -->
         <dependency>
             <groupId>org.apache.camel</groupId>
@@ -162,14 +198,14 @@
                 <groupId>org.apache.camel</groupId>
                 <artifactId>camel-maven-plugin</artifactId>
                 <version>2.15.3</version>
-                <!--<configuration>-->
-                    <!--<systemProperties>-->
-                        <!--<systemProperty>-->
-                            <!--<key>endpoint.file.baseUrl</key>-->
-                            <!--<value>${endpoint.file.baseUrl}</value>-->
-                        <!--</systemProperty>-->
-                    <!--</systemProperties>-->
-                <!--</configuration>-->
+                <!--<configuration> -->
+                <!--<systemProperties> -->
+                <!--<systemProperty> -->
+                <!--<key>endpoint.file.baseUrl</key> -->
+                <!--<value>${endpoint.file.baseUrl}</value> -->
+                <!--</systemProperty> -->
+                <!--</systemProperties> -->
+                <!--</configuration> -->
             </plugin>
             <!-- to generate the MANIFEST-FILE of the bundle -->
             <plugin>
@@ -202,7 +238,8 @@
                 </executions>
                 <configuration>
                     <tasks>
-                        <copy file="${build.directory}/${project.build.finalName}.jar" tofile="${project.basedir}/docker/main/sys-int.jar"/>
+                        <copy file="${build.directory}/${project.build.finalName}.jar"
+                              tofile="${project.basedir}/docker/main/sys-int.jar"/>
                     </tasks>
                 </configuration>
             </plugin>
