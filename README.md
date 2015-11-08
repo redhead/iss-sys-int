@@ -23,7 +23,7 @@ Run the provided image with the systems to integrate (you can do this once even 
 
 Add `jboss-fuse.zip` with JBoss Fuse installation to `docker/base` folder.
 
-Build the base image (with Fuse, Wildfly, Apiman); needed only once unless you change something in the `docker/base`` folder.
+Build the base image (with Fuse, Wildfly, Apiman); needed only once unless you change something in the `docker/base` folder. On the UNIX system is nescessary `chmod +x docker/base/install.sh`
 
     docker build -t iss/int-base docker/base
 
