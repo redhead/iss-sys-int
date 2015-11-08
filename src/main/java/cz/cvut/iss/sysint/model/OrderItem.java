@@ -46,12 +46,10 @@ public class OrderItem {
         this.count = count;
     }
 
-    @JsonIgnore
     public double getUnitPrice() {
         return unitPrice;
     }
 
-    @JsonIgnore
     public void setUnitPrice(double unitPrice) {
         this.unitPrice = unitPrice;
     }
