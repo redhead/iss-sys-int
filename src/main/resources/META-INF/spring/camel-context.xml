@@ -11,15 +11,12 @@
         <property name="location" value="classpath:application.properties"/>
     </bean>
 
-    <camel:sslContextParameters id="sslContextParameters"
-                                xmlns="http://camel.apache.org/schema/spring">
-        <keyManagers keyPassword="redhat">
-            <keyStore type="JKS" resource="${location.keystore}keystore.jks"
-                      password="redhat"/>
+    <camel:sslContextParameters id="sslContextParameters" xmlns="http://camel.apache.org/schema/spring">
+        <keyManagers keyPassword="orderService">
+            <keyStore type="JKS" resource="${location.keystore}order_ks.jks" password="orderService"/>
         </keyManagers>
         <trustManagers>
-            <keyStore type="JKS" resource="${location.truststore}keystore.jks"
-                      password="redhat"/>
+            <keyStore type="JKS" resource="${location.truststore}order_ts.jks" password="orderService"/>
         </trustManagers>
     </camel:sslContextParameters>
 

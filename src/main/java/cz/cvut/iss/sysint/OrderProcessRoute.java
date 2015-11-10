@@ -1,9 +1,6 @@
 package cz.cvut.iss.sysint;
 
-import cz.cvut.iss.sysint.converter.SupplierARequestConverter;
-import cz.cvut.iss.sysint.converter.SupplierAResponseConverter;
-import cz.cvut.iss.sysint.converter.SupplierBRequestConverter;
-import cz.cvut.iss.sysint.converter.SupplierBResponseConverter;
+import cz.cvut.iss.sysint.converter.*;
 import cz.cvut.iss.sysint.exception.CancelOrderException;
 import cz.cvut.iss.sysint.model.Address;
 import cz.cvut.iss.sysint.model.Order;
@@ -118,6 +115,7 @@ public class OrderProcessRoute extends RouteBuilder {
 
         from("direct:accounting")
             .id("accounting")
+            .process(new AccountingRequestConverter())
             .marshal(json)
             .bean(Debugger.class,"process")
             .log("${body}")
@@ -133,10 +131,10 @@ public class OrderProcessRoute extends RouteBuilder {
             .end();
 
 
-        from("timer://foo?fixedRate=true&period=10&repeatCount=1")
-            .setBody(method(this, "createOrder"))
-            .to("direct:new-order")
-            .log("${body}");
+//        from("timer://foo?fixedRate=true&period=10&repeatCount=1")
+//            .setBody(method(this, "createOrder"))
+//            .to("direct:new-order")
+//            .log("${body}");
 
         //@formatter:on
     }
@@ -190,6 +188,13 @@ public class OrderProcessRoute extends RouteBuilder {
         order.post().type(Order.class)
             .to("direct:new-order");
 
+        order.get()
+            .to("direct:x");
+
+        from("direct:x")
+            .process(new Debugger())
+            .setBody(simple("OK"));
+
 //        order.get("/{orderId}")
 //            .outType(Order.class)
 //            .to("direct:find-order");
@@ -199,13 +204,13 @@ public class OrderProcessRoute extends RouteBuilder {
         // jetty proxy for SSL
         from("jetty:https://0.0.0.0:8444/services/OrderService?disableStreamCache=true&matchOnUriPrefix=true&sslContextParametersRef=#sslContextParameters&matchOnUriPrefix=true")
             .id("soapProxy")
-            .removeHeaders("Camel*")
+//            .removeHeaders("Camel*")
             .to("jetty:http://localhost:8333/services/OrderService?bridgeEndpoint=true&throwExceptionOnFailure=false");
 
         from("cxf:bean:orderEndpoint")
             .id("soapEndpoint")
             .validate(body().isNotNull())
-            .convertBodyTo(Order.class)
+            .process(new SoapToModelRequestConverter())
             .to("direct:new-order");
     }
 
@@ -213,6 +218,7 @@ public class OrderProcessRoute extends RouteBuilder {
         restConfiguration()
             .component("jetty")
             .bindingMode(RestBindingMode.json)
+            .host("localhost")
             .scheme("https")
             .port(8888)
 

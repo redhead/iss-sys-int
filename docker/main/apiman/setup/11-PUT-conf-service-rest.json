@@ -1,0 +1,11 @@
+{
+	"endpointProperties": {"authorization.type":"mtls"},
+	"endpoint":"https://localhost:8888/order",
+	"endpointType":"rest",
+	"plans":[
+		{"planId":"premium","version":"1.0"},
+		{"planId":"high-volume","version":"1.0"},
+		{"planId":"low-volume","version":"1.0"}
+	],
+	"publicService":false
+}
