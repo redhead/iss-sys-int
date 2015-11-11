@@ -42,7 +42,7 @@ public class OrderProcessRoute extends RouteBuilder {
         soapEndpoint();
 
         from("direct:new-order")
-            .id("newOrder")
+            .routeId("newOrder")
             .process(new OrderValidator())
             .bean(OrderRepository.class, "create")
             .setProperty("orderId", simple("${body.id}"))
@@ -50,7 +50,8 @@ public class OrderProcessRoute extends RouteBuilder {
 
 
         from("direct:process-order")
-            .id("orderProcess")
+            .routeId("orderProcess")
+            .setProperty("orderId", simple("${body.id}"))
             .bean(OrderStatusProvider.class, "inProcess")
             .bean(Debugger.class,"process")
             .setProperty("isVipCustomer", method(VipCustomerProvider.class, "isVip"))
@@ -63,7 +64,7 @@ public class OrderProcessRoute extends RouteBuilder {
             .end();
 
         from("direct:process-order-item")
-            .id("orderItemProcess")
+            .routeId("orderItemProcess")
             .setProperty("originalItem", body())
            	.to("direct:check-available")
            	.to("direct:best-choice")
@@ -71,13 +72,13 @@ public class OrderProcessRoute extends RouteBuilder {
             
         
         from("direct:check-available")
-        	.id("availabilityCheck")
+        	.routeId("availabilityCheck")
         	.to("sql:select count from item where id=:#${property.originalItem.item}?dataSource=xaDataSource")
         	.process(new OrderItemFromSupplierProcessor())
         	.end();
         
         from("direct:best-choice")
-        	.id("bestChoice")
+        	.routeId("bestChoice")
         	.log("best choice ${body}")
         	.bean(Debugger.class, "process")
         	.choice()
@@ -114,7 +115,7 @@ public class OrderProcessRoute extends RouteBuilder {
         json.setEnableJaxbAnnotationModule(false);
 
         from("direct:accounting")
-            .id("accounting")
+            .routeId("accounting")
             .process(new AccountingRequestConverter())
             .marshal(json)
             .bean(Debugger.class,"process")
@@ -203,12 +204,12 @@ public class OrderProcessRoute extends RouteBuilder {
     private void soapEndpoint() {
         // jetty proxy for SSL
         from("jetty:https://0.0.0.0:8444/services/OrderService?disableStreamCache=true&matchOnUriPrefix=true&sslContextParametersRef=#sslContextParameters&matchOnUriPrefix=true")
-            .id("soapProxy")
+            .routeId("soapProxy")
 //            .removeHeaders("Camel*")
             .to("jetty:http://localhost:8333/services/OrderService?bridgeEndpoint=true&throwExceptionOnFailure=false");
 
         from("cxf:bean:orderEndpoint")
-            .id("soapEndpoint")
+            .routeId("soapEndpoint")
             .validate(body().isNotNull())
             .process(new SoapToModelRequestConverter())
             .to("direct:new-order");
