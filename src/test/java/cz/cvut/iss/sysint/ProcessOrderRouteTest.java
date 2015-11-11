@@ -51,7 +51,7 @@ public class ProcessOrderRouteTest extends OrderProcessRouteTest {
                     // skip sending to the real http when the detour ends
                     .skipSendToOriginalEndpoint()
                     .to("mock:accounting");
-                interceptSendToEndpoint("activemq:shipping")
+                interceptSendToEndpoint("activemqXa:shipping")
                     // skip sending to the real http when the detour ends
                     .skipSendToOriginalEndpoint()
                     .to("mock:shipping");

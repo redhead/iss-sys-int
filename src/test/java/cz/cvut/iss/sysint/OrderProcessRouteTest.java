@@ -22,7 +22,7 @@ public abstract class OrderProcessRouteTest extends CamelTestSupport {
     protected CamelContext createCamelContext() throws Exception {
         CamelContext context = super.createCamelContext();
         context.addComponent("https4", context.getComponent("mock"));
-        context.addComponent("activemq", context.getComponent("seda"));
+        context.addComponent("activemqXa", context.getComponent("mock"));
 
         Properties initialProperties = new Properties();
         initialProperties.put("endpoint.file.baseUrl", "./");

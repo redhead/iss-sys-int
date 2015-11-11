@@ -52,7 +52,7 @@ public class OrderProcessRoute extends RouteBuilder {
         from("direct:process-order")
             .routeId("orderProcess")
             .setProperty("orderId", simple("${body.id}"))
-            .bean(OrderStatusProvider.class, "inProcess")
+            .bean(OrderStatusProvider.class, "inProcess")              
             .bean(Debugger.class,"process")
             .setProperty("isVipCustomer", method(VipCustomerProvider.class, "isVip"))
             .split(simple("${body.items}"))
@@ -102,8 +102,8 @@ public class OrderProcessRoute extends RouteBuilder {
             .end();
         	
 
-        configureSupplierRoute(from("direct:supplierA"), "ref:supplierAHttp", SupplierA.class, new SupplierARequestConverter(), new SupplierAResponseConverter());
-        configureSupplierRoute(from("direct:supplierB"), "ref:supplierBHttp", SupplierB.class, new SupplierBRequestConverter(), new SupplierBResponseConverter());
+        configureSupplierRoute(from("direct:supplierA").routeId("supplierA"), "ref:supplierAHttp", SupplierA.class, new SupplierARequestConverter(), new SupplierAResponseConverter());
+        configureSupplierRoute(from("direct:supplierB").routeId("supplierB"), "ref:supplierBHttp", SupplierB.class, new SupplierBRequestConverter(), new SupplierBResponseConverter());
 
 //        from("timer://foo?fixedRate=true&period=5000")
 //        	.setProperty("articleId", constant("rhel"))
@@ -193,6 +193,7 @@ public class OrderProcessRoute extends RouteBuilder {
             .to("direct:x");
 
         from("direct:x")
+            .routeId("X")
             .process(new Debugger())
             .setBody(simple("OK"));
 
@@ -229,7 +230,7 @@ public class OrderProcessRoute extends RouteBuilder {
     }
 
 
-    static class Debugger implements Processor {
+    public static class Debugger implements Processor {
 
         private String str;
 
