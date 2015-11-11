@@ -1,8 +1,14 @@
 package cz.cvut.iss.sysint.model;
 
-public class OrderStatus {
+import java.io.Serializable;
 
-    private String resolution;
+public class OrderStatus implements Serializable{
+
+    /**
+	 * 
+	 */
+	private static final long serialVersionUID = 49660196019150682L;
+	private String resolution;
     private String description;
 
     public OrderStatus(String resolution, String description) {

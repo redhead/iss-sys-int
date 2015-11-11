@@ -8,7 +8,10 @@ import cz.cvut.iss.sysint.model.OrderItem;
 import cz.cvut.iss.sysint.service.*;
 import exam.sysint.redhat.com.supplier_a.SupplierA;
 import exam.sysint.redhat.com.supplier_b.SupplierB;
+
 import org.apache.camel.Exchange;
+import org.apache.camel.ExchangePattern;
+import org.apache.camel.LoggingLevel;
 import org.apache.camel.Processor;
 import org.apache.camel.builder.RouteBuilder;
 import org.apache.camel.component.http4.HttpMethods;
@@ -58,10 +61,40 @@ public class OrderProcessRoute extends RouteBuilder {
             .split(simple("${body.items}"))
                 .to("direct:process-order-item")
             .end()
+            .log(LoggingLevel.TRACE,"process order ${body}")
             .multicast()
                 .to("direct:accounting")
-                .to("activemqXa:shipping")
-            .end();
+                .to("direct:xa-final")
+            .end()
+            ;
+        
+        JacksonDataFormat json = new JacksonDataFormat();
+        json.setEnableJaxbAnnotationModule(false);
+        
+        from("direct:xa-final")
+        	.routeId("finalProcess")
+        	.transacted("REQUIRED")
+        		.multicast()
+        			.to(ExchangePattern.InOnly,"activemqXa:shipping?requestTimeout=30s")
+        			.split(simple("${body.items}"))
+        				.log(LoggingLevel.TRACE," xa final split ${body}")
+        				.choice()
+        					.when(simple("${body.fromSupplier} == false"))
+        						.to("sql:update item set count=count-1 where id=:#${body.item}?dataSource=xaDataSource")
+        				.end()
+        			.end()
+        		.end()
+        	.end();
+        
+        
+        from("direct:expedition")
+        	.routeId("expedition")
+        	.process(new AccountingRequestConverter())
+        	.marshal(json)
+        	.convertBodyTo(String.class)
+        	.removeHeaders("*")  // remove all headers
+        	.to(ExchangePattern.InOnly,"activemqXa:shipping?requestTimeout=30s&jmsMessageType=Text")
+        	.end();
 
         from("direct:process-order-item")
             .routeId("orderItemProcess")
@@ -79,8 +112,9 @@ public class OrderProcessRoute extends RouteBuilder {
         
         from("direct:best-choice")
         	.routeId("bestChoice")
-        	.log("best choice ${body}")
+        	.log(LoggingLevel.TRACE,"best choice ${body}")
         	.bean(Debugger.class, "process")
+        	.setBody(simple("${property.originalItem}"))
         	.choice()
             .when(header("fromSupplier").isEqualTo(true))
                 .multicast()
@@ -111,8 +145,7 @@ public class OrderProcessRoute extends RouteBuilder {
 //            .to("sql:select count from item where id=':#${property.articleId}'?dataSource=xaDataSource")
 //            .log("${body}");
 
-        JacksonDataFormat json = new JacksonDataFormat();
-        json.setEnableJaxbAnnotationModule(false);
+       
 
         from("direct:accounting")
             .routeId("accounting")
@@ -132,10 +165,10 @@ public class OrderProcessRoute extends RouteBuilder {
             .end();
 
 
-//        from("timer://foo?fixedRate=true&period=10&repeatCount=1")
-//            .setBody(method(this, "createOrder"))
-//            .to("direct:new-order")
-//            .log("${body}");
+        from("timer://foo?fixedRate=true&period=10&repeatCount=1")
+            .setBody(method(this, "createOrder"))
+            .to("direct:new-order")
+            .log("${body}");
 
         //@formatter:on
     }

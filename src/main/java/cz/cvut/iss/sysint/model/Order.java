@@ -5,12 +5,19 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
 import javax.xml.bind.annotation.XmlAccessType;
 import javax.xml.bind.annotation.XmlAccessorType;
 import javax.xml.bind.annotation.XmlElement;
+
+import java.io.Serializable;
 import java.util.List;
 
 @XmlAccessorType(XmlAccessType.FIELD)
-public class Order {
+public class Order implements Serializable{
 
-    @XmlElement(nillable = true)
+    /**
+	 * 
+	 */
+	private static final long serialVersionUID = -7861726464876949615L;
+
+	@XmlElement(nillable = true)
     private Long id;
 
     private Address address;

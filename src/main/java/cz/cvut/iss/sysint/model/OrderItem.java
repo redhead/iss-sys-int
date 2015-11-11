@@ -1,8 +1,15 @@
 package cz.cvut.iss.sysint.model;
 
-public class OrderItem {
+import java.io.Serializable;
 
-    private String item;
+public class OrderItem implements Serializable {
+
+    /**
+	 * 
+	 */
+	private static final long serialVersionUID = 1489342672666255095L;
+
+	private String item;
 
     private int count;
 
