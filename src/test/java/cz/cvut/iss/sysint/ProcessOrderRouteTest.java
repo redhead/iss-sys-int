@@ -29,7 +29,7 @@ public class ProcessOrderRouteTest extends OrderProcessRouteTest {
     @EndpointInject(uri = "mock:accounting")
     private MockEndpoint accounting;
     
-    @EndpointInject(uri = "mock:shipping")
+    @EndpointInject(uri = "mock:xa-final")
     private MockEndpoint shipping;
     
     public ProcessOrderRouteTest() {
@@ -51,10 +51,10 @@ public class ProcessOrderRouteTest extends OrderProcessRouteTest {
                     // skip sending to the real http when the detour ends
                     .skipSendToOriginalEndpoint()
                     .to("mock:accounting");
-                interceptSendToEndpoint("activemqXa:shipping")
+                interceptSendToEndpoint("direct:xa-final")
                     // skip sending to the real http when the detour ends
                     .skipSendToOriginalEndpoint()
-                    .to("mock:shipping");
+                    .to("mock:xa-final");
             }
         });
         processOrderItem.expectedMessageCount(2);

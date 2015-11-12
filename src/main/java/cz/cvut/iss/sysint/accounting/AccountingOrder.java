@@ -1,13 +1,16 @@
 package cz.cvut.iss.sysint.accounting;
 
 import cz.cvut.iss.sysint.model.Address;
+import java.io.Serializable;
 
 import java.util.List;
 
 /**
  * @author Radek Jezdik
  */
-public class AccountingOrder {
+public class AccountingOrder implements Serializable {
+    
+    private static final long serialVersionUID = 1489342672647216095L;
 
     private Long id;
 
