@@ -9,25 +9,33 @@ done
 
 sleep 20
 
-urls[0]='organizations'
-urls[1]='organizations/int/plans'
-urls[2]='organizations/int/plans'
-urls[3]='organizations/int/plans'
-urls[4]='organizations/int/plans/high-volume/versions/1.0/policies'
-urls[5]='organizations/int/plans/low-volume/versions/1.0/policies'
-urls[6]='actions'
-urls[7]='actions'
-urls[8]='actions'
-urls[9]='organizations/int/services'
-urls[10]='organizations/int/services/order/versions/1.0'
-urls[11]='actions'
-urls[12]='organizations/int/services'
-urls[13]='organizations/int/services/orderService/versions/1.0'
-urls[14]='actions'
-urls[15]='organizations/int/applications'
-urls[16]='organizations/int/applications/app/versions/1.0/contracts'
-urls[17]='organizations/int/applications/app/versions/1.0/contracts'
-urls[18]='actions'
+i=-1
+
+urls[$((i=i+1))]='organizations'
+urls[$((i=i+1))]='organizations/int/plans'
+urls[$((i=i+1))]='organizations/int/plans'
+urls[$((i=i+1))]='organizations/int/plans'
+urls[$((i=i+1))]='organizations/int/plans/high-volume/versions/1.0/policies'
+urls[$((i=i+1))]='organizations/int/plans/high-volume/versions/1.0/policies'
+urls[$((i=i+1))]='organizations/int/plans/high-volume/versions/1.0/policies'
+urls[$((i=i+1))]='organizations/int/plans/low-volume/versions/1.0/policies'
+urls[$((i=i+1))]='organizations/int/plans/low-volume/versions/1.0/policies'
+urls[$((i=i+1))]='organizations/int/plans/low-volume/versions/1.0/policies'
+urls[$((i=i+1))]='organizations/int/plans/premium/versions/1.0/policies'
+urls[$((i=i+1))]='organizations/int/plans/premium/versions/1.0/policies'
+urls[$((i=i+1))]='actions'
+urls[$((i=i+1))]='actions'
+urls[$((i=i+1))]='actions'
+urls[$((i=i+1))]='organizations/int/services'
+urls[$((i=i+1))]='organizations/int/services/order/versions/1.0'
+urls[$((i=i+1))]='actions'
+urls[$((i=i+1))]='organizations/int/services'
+urls[$((i=i+1))]='organizations/int/services/orderService/versions/1.0'
+urls[$((i=i+1))]='actions'
+urls[$((i=i+1))]='organizations/int/applications'
+urls[$((i=i+1))]='organizations/int/applications/app/versions/1.0/contracts'
+urls[$((i=i+1))]='organizations/int/applications/app/versions/1.0/contracts'
+urls[$((i=i+1))]='actions'
 
 DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
 
@@ -50,3 +58,5 @@ do
     i=$(($i + 1))
 done
 
+java -jar $DIR/h2.jar &
+java -cp $DIR/h2.jar org.h2.tools.RunScript -url jdbc:h2:tcp://localhost/~/test -user sa -password sa -script $DIR/init-users.sql -showResults

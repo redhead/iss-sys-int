@@ -1,0 +1,1 @@
+{"definitionId":"AuthorizationPolicy","configuration":"{\"requestUnmatched\":\"fail\",\"multiMatch\":\"all\",\"rules\":[{\"verb\":\"*\",\"pathPattern\":\".*\",\"role\":\"manager\"}]}"}
