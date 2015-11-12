@@ -6,6 +6,8 @@ import java.util.Map;
 import org.apache.camel.Exchange;
 import org.apache.camel.Processor;
 
+import cz.cvut.iss.sysint.model.OrderItem;
+
 public final class OrderItemFromSupplierProcessor implements Processor {
 	@Override
 	public void process(Exchange exchange) throws Exception {
@@ -13,6 +15,7 @@ public final class OrderItemFromSupplierProcessor implements Processor {
 		Map<String, Integer> row=rows.get(0);
 	    System.out.println(row.get("COUNT"));
 	    int itemAvailability=Integer.valueOf(row.get("COUNT"));
-		exchange.getIn().setHeader("fromSupplier", itemAvailability<=0);
+	    OrderItem item=exchange.getProperty("originalItem", OrderItem.class);
+		exchange.getIn().setHeader("fromSupplier", itemAvailability-item.getCount()<=0);
 	}
 }
