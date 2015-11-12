@@ -73,7 +73,10 @@
             <property key="x509HostnameVerifier" value="allowAllHostnameVerifier"/>
         </endpoint>
 
-        
+        <endpoint id="accountingHttp" uri="http4:${accounting.url}">
+             <property key="sslContextParameters" value="#remoteSystemsSslContextParameters"/>
+             <property key="x509HostnameVerifier" value="allowAllHostnameVerifier"/>
+         </endpoint>
     </camelContext>
 
     <bean id="routeBuilder" class="cz.cvut.iss.sysint.OrderProcessRoute"/>
