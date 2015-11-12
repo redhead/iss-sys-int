@@ -1,0 +1,9 @@
+fabric:create --wait-for-provisioning
+
+mq-create --create-container iss-broker --replicas 2 --group masterslave ms-broker
+
+fabric:profile-create --parent jboss-fuse-full iss-int
+fabric:profile-edit --repository file:/opt/sys-int-feature.xml iss-int
+fabric:profile-edit --feature sys-int iss-int
+
+fabric:container-create-child --profile iss-int root child 1

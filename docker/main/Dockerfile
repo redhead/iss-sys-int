@@ -6,12 +6,13 @@ ADD activemq.xml /opt/jboss/jboss-fuse/etc/
 ADD keystore.jks /opt/jboss/jboss-fuse/bin/
 
 ADD sys-int.jar /opt/sys-int.jar
-ADD feature.xml /opt/jboss/jboss-fuse/deploy/sys-int-feature.xml
-ADD org.apache.karaf.features.cfg /opt/jboss/jboss-fuse/etc/
+ADD feature.xml /opt/sys-int-feature.xml
+ADD fuse-setup /opt/fuse-setup
 
 ADD apiman/gateway_ks.jks /opt/jboss/wildfly/gateway_ks.jks
 ADD apiman/gateway_ts.jks /opt/jboss/wildfly/gateway_ts.jks
 ADD apiman/apiman.properties /opt/jboss/apiman.properties
+ADD apiman/standalone-apiman.xml /opt/jboss/wildfly/standalone/configuration/standalone-apiman.xml
 
 RUN cat /opt/jboss/apiman.properties >> /opt/jboss/wildfly/standalone/configuration/apiman.properties
 
