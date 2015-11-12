@@ -165,10 +165,10 @@ public class OrderProcessRoute extends RouteBuilder {
             .end();
 
 
-        from("timer://foo?fixedRate=true&period=10&repeatCount=1")
-            .setBody(method(this, "createOrder"))
-            .to("direct:new-order")
-            .log("${body}");
+//        from("timer://foo?fixedRate=true&period=10&repeatCount=1")
+//            .setBody(method(this, "createOrder"))
+//            .to("direct:new-order")
+//            .log("${body}");
 
         //@formatter:on
     }
