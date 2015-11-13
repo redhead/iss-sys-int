@@ -62,6 +62,12 @@ public class OrderProcessRoute extends RouteBuilder {
                 .to("direct:process-order-item")
             .end()
             .log(LoggingLevel.TRACE,"process order ${body}")
+            	.choice()
+            		.when(simple("${body.status.resolution} == 'CANCELLED'"))
+            			.log(LoggingLevel.DEBUG, "cancel order")
+            			.transform().constant("Order was cancelled.")
+            			.stop()
+            	.end()
             .multicast()
                 .to("direct:accounting")
                 .to("direct:xa-final")
@@ -80,7 +86,7 @@ public class OrderProcessRoute extends RouteBuilder {
         				.log(LoggingLevel.TRACE," xa final split ${body}")
         				.choice()
         					.when(simple("${body.fromSupplier} == false"))
-        						.to("sql:update item set count=count-1 where id=:#${body.item}?dataSource=xaDataSource")
+        						.to("sql:update item set count=count-:#${body.count} where id=:#${body.item}?dataSource=xaDataSource")
         				.end()
         			.end()
         		.end()
@@ -220,7 +226,8 @@ public class OrderProcessRoute extends RouteBuilder {
             .produces("application/json");
 
         order.post().type(Order.class)
-            .to("direct:new-order");
+            .to("direct:new-order")
+            ;
 
         order.get()
             .to("direct:x");
